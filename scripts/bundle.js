@@ -32678,7 +32678,6 @@ module.exports = React.createClass({
 
 var React = require('react');
 var Backbone = require('backbone');
-
 module.exports = React.createClass({
 	displayName: 'exports',
 
@@ -32690,58 +32689,23 @@ module.exports = React.createClass({
 		});
 	},
 	render: function render() {
-		var currentPage = Backbone.history.getFragment();
-
-		var links = [React.createElement(
-			'li',
-			{ key: 'home', className: currentPage === '' ? 'active' : '' },
-			React.createElement(
-				'a',
-				{ href: '#' },
-				'Home'
-			)
-		)];
-
-		if (Parse.User.current()) {
-			links.push(React.createElement(
+		var allLinks = [];
+		allLinks.push(this.links('', 'Home'));
+		if (Parse.User.current() !== null) {
+			allLinks.push(React.createElement(
 				'li',
-				{ key: 'dashboard', className: currentPage === 'dashboard' ? 'active' : '' },
+				null,
 				React.createElement(
 					'a',
-					{ href: '#dashboard' },
-					'Dashboard'
-				)
-			));
-			links.push(React.createElement(
-				'li',
-				{ key: 'logout' },
-				React.createElement(
-					'a',
-					{ href: '#logout' },
+					{ href: '#logout', ref: 'Logout', onClick: this.logout },
 					'Logout'
 				)
 			));
+			allLinks.push(this.links('dashboard', 'Dashboard'));
 		} else {
-			links.push(React.createElement(
-				'li',
-				{ key: 'login', className: currentPage === 'login' ? 'active' : '' },
-				React.createElement(
-					'a',
-					{ href: '#login' },
-					'Login'
-				)
-			));
-			links.push(React.createElement(
-				'li',
-				{ key: 'register', className: currentPage === 'register' ? 'active' : '' },
-				React.createElement(
-					'a',
-					{ href: '#register' },
-					'Register'
-				)
-			));
+			allLinks.push(this.links('login', 'Login'));
+			allLinks.push(this.links('register', 'Register'));
 		}
-
 		return React.createElement(
 			'div',
 			{ className: 'nav-wrapper' },
@@ -32753,9 +32717,38 @@ module.exports = React.createClass({
 			React.createElement(
 				'ul',
 				{ id: 'nav-mobile', className: 'right' },
-				links
+				allLinks
 			)
 		);
+	},
+	logout: function logout() {
+		Parse.User.logOut();
+		this.forceUpdate();
+		this.props.router.navigate('', { trigger: true });
+	},
+	links: function links(url, label) {
+		var currentUrl = Backbone.history.getFragment();
+		if (currentUrl === url) {
+			return React.createElement(
+				'li',
+				{ className: 'active', key: url },
+				React.createElement(
+					'a',
+					{ href: '#' + url },
+					label
+				)
+			);
+		} else {
+			return React.createElement(
+				'li',
+				{ key: url },
+				React.createElement(
+					'a',
+					{ href: '#' + url },
+					label
+				)
+			);
+		}
 	}
 });
 
@@ -32863,9 +32856,7 @@ var React = require('react');
 var Backbone = require('backbone');
 window.$ = require('jquery');
 window.jQuery = $;
-
-Parse.initialize('bWo3oxF8mUmVjOzLWZaeVYGOYRlJAUJVu9RRVVEB', 'agubNevaI7RuF4hlu4DVHQWlCc4i3EbTBLSftsLp');
-
+Parse.initialize('mPWbKBnhMRMF6YmIMauyfiUtlwzEiLov49c6hDMG', 'rE75lpX6snce5iF3NxKT2O4nWNQi1gaJFw6h9SbO');
 var NavigationComponent = require('./components/NavigationComponent');
 var HomeComponent = require('./components/HomeComponent');
 var DashboardComponent = require('./components/DashboardComponent');
