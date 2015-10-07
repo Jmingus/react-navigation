@@ -32702,6 +32702,7 @@ module.exports = React.createClass({
 				)
 			));
 			allLinks.push(this.links('dashboard', 'Dashboard'));
+			allLinks.push(this.links('thoughts', 'Thoughts'));
 		} else {
 			allLinks.push(this.links('login', 'Login'));
 			allLinks.push(this.links('register', 'Register'));
@@ -32712,7 +32713,7 @@ module.exports = React.createClass({
 			React.createElement(
 				'a',
 				{ href: '#', className: 'brand-logo left' },
-				'Login Example'
+				'React Navigation'
 			),
 			React.createElement(
 				'ul',
@@ -32852,6 +32853,141 @@ module.exports = React.createClass({
 
 },{"react":159}],165:[function(require,module,exports){
 'use strict';
+
+var React = require('react');
+var ThoughtModel = require('../models/ThoughtModel');
+var SurveyListComponent = require('./SurveyListComponent');
+var Backbone = require('backbone');
+var _ = require('backbone/node_modules/underscore');
+
+module.exports = React.createClass({
+  displayName: 'exports',
+
+  componentWillMount: function componentWillMount() {
+    this.dispatcher = {};
+    _.extend(this.dispatcher, Backbone.Events);
+  },
+  render: function render() {
+
+    return React.createElement(
+      'div',
+      { className: 'row' },
+      React.createElement(
+        'form',
+        { className: 'col s12', onSubmit: this.onSubmit },
+        React.createElement(
+          'div',
+          { className: 'row' },
+          React.createElement(
+            'div',
+            { className: 'input-field col s6' },
+            React.createElement(
+              'label',
+              { htmlFor: 'first_name' },
+              'First Name'
+            ),
+            React.createElement('input', { placeholder: 'First Name', id: 'first_name', ref: 'firstName', type: 'text' })
+          ),
+          React.createElement(
+            'div',
+            { className: 'input-field col s6' },
+            React.createElement(
+              'label',
+              { htmlFor: 'last_name' },
+              'Last Name'
+            ),
+            React.createElement('input', { id: 'last_name', type: 'text', ref: 'lastName', placeholder: 'Last Name' })
+          )
+        ),
+        React.createElement(
+          'div',
+          { className: 'row' },
+          React.createElement(
+            'div',
+            { className: 'input-field col s12' },
+            React.createElement(
+              'label',
+              { htmlFor: 'thoughts' },
+              'Enter Your Thoughts'
+            ),
+            React.createElement('textarea', { id: 'thoughts', type: 'text', ref: 'thought', placeholder: 'Thoughts' })
+          )
+        ),
+        React.createElement(
+          'button',
+          { type: 'submit', className: 'btn' },
+          'Submit Thought'
+        )
+      ),
+      React.createElement(SurveyListComponent, { dispatcher: this.dispatcher })
+    );
+  },
+  onSubmit: function onSubmit(e) {
+    e.preventDefault();
+    var newThought = new ThoughtModel({
+      firstName: this.refs.firstName.getDOMNode().value,
+      lastName: this.refs.lastName.getDOMNode().value,
+      thought: this.refs.thought.getDOMNode().value,
+      user: Parse.User.current()
+    });
+    newThought.save();
+    this.dispatcher.trigger('updateThought');
+  }
+});
+
+},{"../models/ThoughtModel":168,"./SurveyListComponent":166,"backbone":1,"backbone/node_modules/underscore":2,"react":159}],166:[function(require,module,exports){
+'use strict';
+
+var React = require('react');
+var ThoughtModel = require('../models/ThoughtModel');
+
+module.exports = React.createClass({
+  displayName: 'exports',
+
+  getInitialState: function getInitialState() {
+    return {
+      thought: []
+    };
+  },
+  componentWillMount: function componentWillMount() {
+    var self = this;
+    this.query = new Parse.Query(ThoughtModel);
+    this.fetch();
+    this.props.dispatcher.on('updateThought', function () {
+      self.fetch();
+    });
+  },
+  render: function render() {
+    var thoughtElements = this.state.thought.map(function (thought) {
+      return React.createElement(
+        'li',
+        null,
+        thought.get('thought')
+      );
+    });
+    return React.createElement(
+      'div',
+      null,
+      React.createElement(
+        'ul',
+        null,
+        thoughtElements
+      )
+    );
+  },
+  fetch: function fetch() {
+    var _this = this;
+
+    this.query.find().then(function (thought) {
+      _this.setState({ thought: thought });
+    }, function (err) {
+      console.log(err);
+    });
+  }
+});
+
+},{"../models/ThoughtModel":168,"react":159}],167:[function(require,module,exports){
+'use strict';
 var React = require('react');
 var Backbone = require('backbone');
 window.$ = require('jquery');
@@ -32862,6 +32998,7 @@ var HomeComponent = require('./components/HomeComponent');
 var DashboardComponent = require('./components/DashboardComponent');
 var LoginComponent = require('./components/LoginComponent');
 var RegisterComponent = require('./components/RegisterComponent');
+var SurveyComponent = require('./components/SurveyComponent');
 
 var app = document.getElementById('app');
 
@@ -32870,7 +33007,8 @@ var Router = Backbone.Router.extend({
 		'': 'home',
 		'dashboard': 'dashboard',
 		'login': 'login',
-		'register': 'register'
+		'register': 'register',
+		'thoughts': 'thoughts'
 	},
 	home: function home() {
 		React.render(React.createElement(HomeComponent, null), app);
@@ -32883,6 +33021,9 @@ var Router = Backbone.Router.extend({
 	},
 	register: function register() {
 		React.render(React.createElement(RegisterComponent, { router: r }), app);
+	},
+	thoughts: function thoughts() {
+		React.render(React.createElement(SurveyComponent, null), app);
 	}
 });
 
@@ -32891,7 +33032,14 @@ Backbone.history.start();
 
 React.render(React.createElement(NavigationComponent, { router: r }), document.getElementById('nav'));
 
-},{"./components/DashboardComponent":160,"./components/HomeComponent":161,"./components/LoginComponent":162,"./components/NavigationComponent":163,"./components/RegisterComponent":164,"backbone":1,"jquery":4,"react":159}]},{},[165])
+},{"./components/DashboardComponent":160,"./components/HomeComponent":161,"./components/LoginComponent":162,"./components/NavigationComponent":163,"./components/RegisterComponent":164,"./components/SurveyComponent":165,"backbone":1,"jquery":4,"react":159}],168:[function(require,module,exports){
+'use strict';
+
+module.exports = Parse.Object.extend({
+  className: 'Thought'
+});
+
+},{}]},{},[167])
 
 
 //# sourceMappingURL=bundle.js.map

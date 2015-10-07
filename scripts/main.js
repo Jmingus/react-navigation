@@ -9,6 +9,7 @@ var HomeComponent = require('./components/HomeComponent');
 var DashboardComponent = require('./components/DashboardComponent');
 var LoginComponent = require('./components/LoginComponent');
 var RegisterComponent = require('./components/RegisterComponent');
+var SurveyComponent = require('./components/SurveyComponent')
 
 var app = document.getElementById('app');
 
@@ -17,7 +18,8 @@ var Router = Backbone.Router.extend({
 		'': 'home',
 		'dashboard': 'dashboard',
 		'login': 'login',
-		'register': 'register'
+		'register': 'register',
+		'thoughts': 'thoughts'
 	},
 	home: function() {
 		React.render(<HomeComponent />, app);
@@ -30,6 +32,9 @@ var Router = Backbone.Router.extend({
 	},
 	register: function() {
 		React.render(<RegisterComponent router={r} />, app);
+	},
+	thoughts: function(){
+		React.render(<SurveyComponent />, app)
 	}
 });
 
